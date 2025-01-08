@@ -5,7 +5,7 @@ class EconodataSpider(scrapy.Spider):
     name = "econodata"
 
     # Lista de cidades e páginas
-    cidades = ['itapeva', 'aracatuba', 'itapetininga', 'piracicaba', 'araraquara', 'ribeirao-preto']
+    cidades = ['itapeva', 'aracatuba', 'itapetininga', 'piracicaba', 'araraquara', 'ribeirao-preto', 'sao-jose-do-rio-preto']
 
     def start_requests(self):
         # Gera as URLs dinamicamente para todas as cidades e páginas
@@ -16,19 +16,19 @@ class EconodataSpider(scrapy.Spider):
 
     def parse(self, response):
         # Coleta as informações da página
-        qtd_empresas = response.css('#galhos-empresa-title-h1 .font-bold::text').get() 
-        empresas = response.css('.block span::text').getall() 
-        cidade = response.meta['cidade']  # Cidade enviada na meta
-        pagina = response.meta['pagina']  # Página enviada na meta
-        cep = response.css('.lg\:block::text').getall()
-        setor = response.css('.max-w-2\.5xs::text').getall()
+        cidade = response.meta['cidade']
+        pagina = response.meta['pagina']
 
-        # Retorna os resultados
-        yield {
-            'cidade': cidade,
-            'pagina': pagina,
-            'qtd_empresas': qtd_empresas,
-            'empresas': empresas,
-            'cep': cep,
-            'setor': setor,
-        }
+        empresas = response.css('.block span::text').getall()
+        ceps = response.css('.lg\:block::text').getall()
+        setores = response.css('.max-w-2\.5xs::text').getall()
+
+        # Gera uma linha separada para cada empresa
+        for i in range(len(empresas)):
+            yield {
+                'cidade': cidade,
+                'pagina': pagina,
+                'empresa': empresas[i] if i < len(empresas) else None,
+                'cep': ceps[i] if i < len(ceps) else None,
+                'setor': setores[i] if i < len(setores) else None,
+            }
